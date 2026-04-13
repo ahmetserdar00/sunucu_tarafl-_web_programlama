@@ -1,0 +1,82 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Hasta Listesi - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Hasta Dizini</h5>
+        <p class="text-muted small mb-0">Kayıtlı tüm hastaları görüntüleyin ve yönetin</p>
+    </div>
+    <a href="{% url 'patient_create' %}" class="btn btn-primary btn-sm">
+        + Yeni Hasta Ekle
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="get" class="mb-3">
+            <div class="input-group" style="max-width: 400px;">
+                <input type="text" name="search" value="{{ search }}"
+                       class="form-control form-control-sm"
+                       placeholder="Ad, T.C. No veya telefon ile ara...">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Ara</button>
+                {% if search %}
+                <a href="{% url 'patient_list' %}" class="btn btn-outline-secondary btn-sm">Temizle</a>
+                {% endif %}
+            </div>
+        </form>
+
+        {% if patients %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Hasta</th>
+                        <th>T.C. Kimlik No</th>
+                        <th>Yaş</th>
+                        <th>Ağırlık</th>
+                        <th>Telefon</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center
+                                            justify-content-center fw-bold"
+                                     style="width: 34px; height: 34px; font-size: 13px; flex-shrink: 0;">
+                                    {{ patient.full_name|first|upper }}
+                                </div>
+                                {{ patient.full_name }}
+                            </div>
+                        </td>
+                        <td>{{ patient.national_id|default:"&mdash;" }}</td>
+                        <td>{{ patient.age }} yıl</td>
+                        <td>{{ patient.base_weight }} kg</td>
+                        <td>{{ patient.phone_number }}</td>
+                        <td>
+                            <a href="{% url 'vitals_predict' %}?patient={{ patient.id }}"
+                               class="btn btn-outline-primary btn-sm">
+                                Ölçüm Al
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-5 mb-0">
+            {% if search %}
+                "{{ search }}" için kayıt bulunamadı.
+            {% else %}
+                Henüz kayıtlı hasta bulunmamaktadır.
+            {% endif %}
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

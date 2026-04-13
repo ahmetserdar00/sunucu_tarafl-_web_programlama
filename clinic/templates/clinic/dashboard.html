@@ -1,0 +1,105 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Dashboard - MHI System{% endblock %}
+
+{% block content %}
+<h5 class="fw-bold mb-1">Klinik Genel Bakış</h5>
+<p class="text-muted small mb-4">Maternal Health Risk Sistemi &mdash; genel istatistikler</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card p-3 stat-card">
+            <div class="text-muted small">Toplam Hasta</div>
+            <div class="fs-2 fw-bold">{{ total_patients }}</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card p-3 stat-card">
+            <div class="text-muted small">Toplam Doktor</div>
+            <div class="fs-2 fw-bold">{{ total_doctors }}</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card p-3 stat-card">
+            <div class="text-muted small">Randevular</div>
+            <div class="fs-2 fw-bold">{{ total_appointments }}</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card p-3 stat-card">
+            <div class="text-muted small">Kayıtlı Ölçüm</div>
+            <div class="fs-2 fw-bold">{{ total_vitals }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    {% if metrics %}
+    <div class="col-lg-6">
+        <div class="card p-4 h-100">
+            <h6 class="fw-semibold mb-3">Model Performans Analizi</h6>
+            <p class="text-muted small mb-3">
+                Risk tespitinde kullanılan makine öğrenmesi algoritmalarının doğruluk oranları
+            </p>
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Model</th>
+                        <th style="width: 80px;">Doğruluk</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for metric in metrics %}
+                    <tr>
+                        <td>{{ metric.model_name }}</td>
+                        <td>%{{ metric.accuracy_score }}</td>
+                        <td style="min-width: 100px;">
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar"
+                                     style="width: {{ metric.accuracy_score }}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if recent_vitals %}
+    <div class="col-lg-6">
+        <div class="card p-4 h-100">
+            <h6 class="fw-semibold mb-3">Son Ölçümler</h6>
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Hasta</th>
+                        <th>Risk</th>
+                        <th>Tarih</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in recent_vitals %}
+                    <tr>
+                        <td>{{ v.patient.full_name }}</td>
+                        <td>
+                            {% if v.risk_level == 'Low' %}
+                            <span class="badge badge-low">Düşük</span>
+                            {% elif v.risk_level == 'Mid' %}
+                            <span class="badge badge-mid">Orta</span>
+                            {% else %}
+                            <span class="badge badge-high">Yüksek</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ v.recorded_at|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

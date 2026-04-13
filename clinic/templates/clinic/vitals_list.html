@@ -1,0 +1,62 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Ölçüm Kayıtları - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Ölçüm Kayıtları</h5>
+        <p class="text-muted small mb-0">Tüm gebelik vital ölçümleri ve risk sonuçları</p>
+    </div>
+    <a href="{% url 'vitals_predict' %}" class="btn btn-primary btn-sm">
+        + Yeni Ölçüm Al
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if vitals %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3">Hasta</th>
+                        <th>Sis. Tansiyon</th>
+                        <th>Dias. Tansiyon</th>
+                        <th>Kan Şekeri</th>
+                        <th>Kalp Hızı</th>
+                        <th>Vücut Isısı</th>
+                        <th>Risk</th>
+                        <th>Kayıt Tarihi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in vitals %}
+                    <tr>
+                        <td class="px-3">{{ v.patient.full_name }}</td>
+                        <td>{{ v.systolic_bp }} mmHg</td>
+                        <td>{{ v.diastolic_bp }} mmHg</td>
+                        <td>{{ v.blood_sugar }} mmol/L</td>
+                        <td>{{ v.heart_rate }} bpm</td>
+                        <td>{{ v.body_temp }} °F</td>
+                        <td>
+                            {% if v.risk_level == 'Low' %}
+                            <span class="badge badge-low">Düşük</span>
+                            {% elif v.risk_level == 'Mid' %}
+                            <span class="badge badge-mid">Orta</span>
+                            {% else %}
+                            <span class="badge badge-high">Yüksek</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ v.recorded_at|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-5 mb-0">Henüz ölçüm kaydı bulunmamaktadır.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Giriş - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center"
+     style="min-height: 100vh; margin: -28px -32px; background: #f0f4f8;">
+    <div class="card p-4" style="width: 380px; border-radius: 14px;">
+        <div class="text-center mb-4 mt-2">
+            <div class="fs-2 mb-2">&#9829;</div>
+            <h5 class="fw-bold mb-1">Maternal Health System</h5>
+            <p class="text-muted small">Sisteme giriş yapın</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger py-2 small">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-semibold small">Kullanıcı Adı</label>
+                <input type="text" name="username" class="form-control"
+                       placeholder="admin veya patient1" required autofocus>
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-semibold small">Şifre</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+        </form>
+
+        <hr class="my-3">
+        <div class="text-center">
+            <a href="{% url 'result_lookup' %}" class="text-muted small">
+                Sonuç sorgulamak için tıklayın
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

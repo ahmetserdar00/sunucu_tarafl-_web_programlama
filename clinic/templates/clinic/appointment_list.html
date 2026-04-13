@@ -1,0 +1,56 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Randevular - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Randevular</h5>
+        <p class="text-muted small mb-0">Hasta-doktor randevu listesi</p>
+    </div>
+    <a href="{% url 'appointment_create' %}" class="btn btn-primary btn-sm">
+        + Yeni Randevu
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if appointments %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3">Hasta</th>
+                        <th>Doktor</th>
+                        <th>Tarih</th>
+                        <th>Saat</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                        <td class="px-3">{{ appt.patient.full_name }}</td>
+                        <td>Dr. {{ appt.doctor.name }}</td>
+                        <td>{{ appt.date|date:"d.m.Y" }}</td>
+                        <td>{{ appt.time|time:"H:i" }}</td>
+                        <td>
+                            {% if appt.status == 'Scheduled' %}
+                            <span class="badge bg-primary">Planlandı</span>
+                            {% elif appt.status == 'Completed' %}
+                            <span class="badge bg-success">Tamamlandı</span>
+                            {% else %}
+                            <span class="badge bg-secondary">İptal</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-5 mb-0">Henüz randevu bulunmamaktadır.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

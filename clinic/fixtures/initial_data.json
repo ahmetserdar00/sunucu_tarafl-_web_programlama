@@ -1,0 +1,34 @@
+[
+    {
+        "model": "clinic.modelmetric",
+        "pk": 1,
+        "fields": {
+            "model_name": "Random Forest",
+            "accuracy_score": 87.5
+        }
+    },
+    {
+        "model": "clinic.modelmetric",
+        "pk": 2,
+        "fields": {
+            "model_name": "Decision Tree",
+            "accuracy_score": 82.75
+        }
+    },
+    {
+        "model": "clinic.modelmetric",
+        "pk": 3,
+        "fields": {
+            "model_name": "Artificial Neural Network",
+            "accuracy_score": 91.2
+        }
+    },
+    {
+        "model": "clinic.modelmetric",
+        "pk": 4,
+        "fields": {
+            "model_name": "Naive Bayes",
+            "accuracy_score": 78.4
+        }
+    }
+]

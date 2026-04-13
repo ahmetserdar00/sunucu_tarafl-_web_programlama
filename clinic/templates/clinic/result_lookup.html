@@ -1,0 +1,68 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Sonuç Sorgula - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center mt-4">
+    <div class="card" style="width: 440px;">
+        <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <div class="fs-2 mb-2">&#9679;</div>
+                <h5 class="fw-bold mb-1">Güvenli Sonuç Sorgulama</h5>
+                <p class="text-muted small">
+                    T.C. kimlik numaranız ile risk sonucunuzu güvenle öğrenin
+                </p>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="text-danger small mt-1">
+                        {% for error in field.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary w-100">Sonucu Görüntüle</button>
+            </form>
+
+            {% if error %}
+            <div class="alert alert-danger mt-3 py-2 small">{{ error }}</div>
+            {% endif %}
+
+            {% if result %}
+            <div class="card mt-3 border-0 bg-light p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Hasta Adı</span>
+                    <span class="fw-semibold">{{ result.patient_name }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Risk Seviyesi</span>
+                    {% if result.risk_level == 'Low' %}
+                    <span class="badge badge-low">Düşük Risk</span>
+                    {% elif result.risk_level == 'Mid' %}
+                    <span class="badge badge-mid">Orta Risk</span>
+                    {% else %}
+                    <span class="badge badge-high">Yüksek Risk</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">Test Tarihi</span>
+                    <span class="small">{{ result.recorded_at|date:"d.m.Y H:i" }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-3">
+                <a href="{% url 'login' %}" class="text-muted small">
+                    &larr; Giriş sayfasına dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

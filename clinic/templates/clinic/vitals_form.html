@@ -1,0 +1,81 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Risk Analizi - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Risk Analizi</h5>
+        <p class="text-muted small mb-0">
+            Hastanın vital bulgularını girerek maternal risk seviyesini hesaplayın
+        </p>
+    </div>
+    <a href="{% url 'vitals_list' %}" class="btn btn-outline-secondary btn-sm">
+        &larr; Geri Dön
+    </a>
+</div>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-body p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold small">{{ form.patient.label }}</label>
+                {{ form.patient }}
+                {% if form.patient.errors %}
+                <div class="text-danger small mt-1">{{ form.patient.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">{{ form.systolic_bp.label }}</label>
+                    {{ form.systolic_bp }}
+                    {% if form.systolic_bp.errors %}
+                    <div class="text-danger small">{{ form.systolic_bp.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">{{ form.diastolic_bp.label }}</label>
+                    {{ form.diastolic_bp }}
+                    {% if form.diastolic_bp.errors %}
+                    <div class="text-danger small">{{ form.diastolic_bp.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">{{ form.blood_sugar.label }}</label>
+                    {{ form.blood_sugar }}
+                    {% if form.blood_sugar.errors %}
+                    <div class="text-danger small">{{ form.blood_sugar.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">{{ form.body_temp.label }}</label>
+                    {{ form.body_temp }}
+                    {% if form.body_temp.errors %}
+                    <div class="text-danger small">{{ form.body_temp.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">{{ form.heart_rate.label }}</label>
+                    {{ form.heart_rate }}
+                    {% if form.heart_rate.errors %}
+                    <div class="text-danger small">{{ form.heart_rate.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="alert alert-light border mt-4 mb-3 small">
+                <strong>Risk Hesaplama Kriterleri:</strong> Sistolik &gt;140 veya &lt;90,
+                Diastolik &gt;90 veya &lt;60, Kan şekeri &gt;11 mmol/L, Ateş &gt;100.4°F,
+                Kalp hızı &gt;100 bpm değerleri yüksek risk göstergesidir.
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                Risk Analizi Yap
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

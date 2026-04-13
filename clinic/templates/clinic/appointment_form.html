@@ -1,0 +1,38 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Yeni Randevu - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Yeni Randevu Oluştur</h5>
+        <p class="text-muted small mb-0">Hasta ve doktor seçerek randevu planlayın</p>
+    </div>
+    <a href="{% url 'appointment_list' %}" class="btn btn-outline-secondary btn-sm">
+        &larr; Geri Dön
+    </a>
+</div>
+
+<div class="card" style="max-width: 520px;">
+    <div class="card-body p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="text-danger small mt-1">
+                    {% for error in field.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Randevuyu Kaydet</button>
+                <a href="{% url 'appointment_list' %}" class="btn btn-outline-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
