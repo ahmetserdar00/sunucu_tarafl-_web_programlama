@@ -16,6 +16,8 @@ urlpatterns = [
     path('vitals/', ui_views.vitals_list_view, name='vitals_list'),
     path('vitals/predict/', ui_views.vitals_predict_view, name='vitals_predict'),
     path('result-lookup/', ui_views.result_lookup_view, name='result_lookup'),
+    path('doctors/', ui_views.doctor_list_view, name='doctor_list'),
+    path('doctors/new/', ui_views.doctor_create_view, name='doctor_create'),
     path('appointments/', ui_views.appointment_list_view, name='appointment_list'),
     path('appointments/new/', ui_views.appointment_create_view, name='appointment_create'),
 

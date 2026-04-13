@@ -1,0 +1,53 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Doktorlar - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Doktorlar</h5>
+        <p class="text-muted small mb-0">Klinikte kayıtlı doktorları görüntüleyin ve yönetin</p>
+    </div>
+    <a href="{% url 'doctor_create' %}" class="btn btn-primary btn-sm">
+        + Yeni Doktor Ekle
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if doctors %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3">Doktor</th>
+                        <th>Uzmanlık Alanı</th>
+                        <th>Telefon</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doctor in doctors %}
+                    <tr>
+                        <td class="px-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-success text-white d-flex align-items-center
+                                            justify-content-center fw-bold"
+                                     style="width: 34px; height: 34px; font-size: 13px; flex-shrink: 0;">
+                                    {{ doctor.name|first|upper }}
+                                </div>
+                                Dr. {{ doctor.name }}
+                            </div>
+                        </td>
+                        <td>{{ doctor.specialty }}</td>
+                        <td>{{ doctor.phone_number }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-5 mb-0">Henüz kayıtlı doktor bulunmamaktadır.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

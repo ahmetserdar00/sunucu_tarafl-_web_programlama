@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from .models import Patient, Doctor, Appointment, PregnancyVitals, ModelMetric
-from .forms import PatientForm, VitalsForm, ResultLookupForm, AppointmentForm
+from .forms import PatientForm, VitalsForm, ResultLookupForm, AppointmentForm, DoctorForm
 from .views import calculate_risk
 
 
@@ -143,6 +143,25 @@ def result_lookup_view(request):
         'result': result,
         'error': error,
     })
+
+
+@login_required
+def doctor_list_view(request):
+    doctors = Doctor.objects.all().order_by('name')
+    return render(request, 'clinic/doctor_list.html', {'doctors': doctors})
+
+
+@login_required
+def doctor_create_view(request):
+    if request.method == 'POST':
+        form = DoctorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Doktor başarıyla eklendi.')
+            return redirect('doctor_list')
+    else:
+        form = DoctorForm()
+    return render(request, 'clinic/doctor_form.html', {'form': form})
 
 
 @login_required

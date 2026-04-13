@@ -78,6 +78,10 @@
                class="{% if 'patient' in request.resolver_match.url_name %}active{% endif %}">
                 Hastalar
             </a>
+            <a href="{% url 'doctor_list' %}"
+               class="{% if 'doctor' in request.resolver_match.url_name %}active{% endif %}">
+                Doktorlar
+            </a>
             <a href="{% url 'vitals_list' %}"
                class="{% if 'vitals' in request.resolver_match.url_name %}active{% endif %}">
                 Ölçümler

@@ -76,6 +76,22 @@ class ResultLookupForm(forms.Form):
     )
 
 
+class DoctorForm(forms.ModelForm):
+    class Meta:
+        model = Doctor
+        fields = ['name', 'specialty', 'phone_number']
+        widgets = {
+            'name': forms.TextInput(attrs={**BOOTSTRAP_INPUT, 'placeholder': 'Örn: Ahmet Yılmaz'}),
+            'specialty': forms.TextInput(attrs={**BOOTSTRAP_INPUT, 'placeholder': 'Örn: Kadın Hastalıkları ve Doğum'}),
+            'phone_number': forms.TextInput(attrs={**BOOTSTRAP_INPUT, 'placeholder': '+90 555 123 4567'}),
+        }
+        labels = {
+            'name': 'Ad Soyad',
+            'specialty': 'Uzmanlık Alanı',
+            'phone_number': 'Telefon Numarası',
+        }
+
+
 class AppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment

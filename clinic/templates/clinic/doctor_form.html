@@ -1,0 +1,38 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Yeni Doktor - MHI System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Yeni Doktor Ekle</h5>
+        <p class="text-muted small mb-0">Doktorun bilgilerini girin</p>
+    </div>
+    <a href="{% url 'doctor_list' %}" class="btn btn-outline-secondary btn-sm">
+        &larr; Geri Dön
+    </a>
+</div>
+
+<div class="card" style="max-width: 520px;">
+    <div class="card-body p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label fw-semibold small">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="text-danger small mt-1">
+                    {% for error in field.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Doktoru Kaydet</button>
+                <a href="{% url 'doctor_list' %}" class="btn btn-outline-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
