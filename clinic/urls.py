@@ -24,8 +24,8 @@ urlpatterns = [
     # REST API endpointleri
     path('api/', include(router.urls)),
     path('api/my-vitals/', views.my_vitals, name='my_vitals'),
-    path('api/doctors/', views.doctor_list, name='doctor_list'),
-    path('api/doctors/create/', views.create_doctor, name='create_doctor'),
+    path('api/doctors/', views.doctor_list, name='doctor_list_api'),
+    path('api/doctors/create/', views.create_doctor, name='create_doctor_api'),
     path('api/appointments/', views.appointment_list, name='appointment_list_api'),
     path('api/appointments/create/', views.create_appointment, name='create_appointment'),
     path('api/vitals/predict/', views.create_vitals_predict, name='create_vitals_predict'),
