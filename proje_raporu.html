@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Maternal Health Risk System – Proje Raporu</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 13px; color: #222; margin: 40px; line-height: 1.6; }
+  h1 { font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 6px; }
+  h2 { font-size: 15px; margin-top: 28px; margin-bottom: 6px; border-left: 4px solid #2563eb; padding-left: 8px; }
+  h3 { font-size: 13px; margin-top: 16px; margin-bottom: 4px; color: #444; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 12px; }
+  th { background: #f1f5f9; text-align: left; padding: 7px 10px; border: 1px solid #ccc; }
+  td { padding: 6px 10px; border: 1px solid #ddd; vertical-align: top; }
+  code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-size: 11.5px; font-family: Consolas, monospace; }
+  pre { background: #f8f8f8; border: 1px solid #ddd; padding: 10px 14px; border-radius: 4px; font-size: 11px; font-family: Consolas, monospace; overflow-x: auto; line-height: 1.5; }
+  .check { color: #16a34a; font-weight: bold; }
+  .meta { color: #555; font-size: 12px; margin-bottom: 20px; }
+  .section-note { color: #555; font-size: 12px; margin-bottom: 10px; }
+  @media print { body { margin: 20px; } }
+</style>
+</head>
+<body>
+
+<h1>Maternal Health Risk System – Teknik Proje Raporu</h1>
+<div class="meta">
+  İstanbul Topkapı Üniversitesi &nbsp;|&nbsp; Yazılım Mühendisliği &nbsp;|&nbsp;
+  Sunucu Taraflı Web Programlama (FET342) &nbsp;|&nbsp; Bahar 2026
+</div>
+
+<!-- ===================== GENEL BAKIŞ ===================== -->
+<h2>Projeye Genel Bakış</h2>
+<p class="section-note">
+  Maternal Health Risk System, gebelik dönemindeki hastaların vital bulgularını (tansiyon, kan şekeri,
+  kalp atış hızı vb.) kaydeden ve risk seviyesini hesaplayan bir klinik yönetim uygulamasıdır.
+  Backend Django ve Django REST Framework ile, arayüz ise Django Templates ve Bootstrap 5 ile geliştirilmiştir.
+  Uygulama <strong>tadesyapi.com</strong> adresinde canlı olarak çalışmaktadır.
+</p>
+
+<table>
+  <tr>
+    <th>Kriter</th>
+    <th>Gereksinim</th>
+    <th>Mevcut Durum</th>
+    <th></th>
+  </tr>
+  <tr>
+    <td>Model sayısı</td>
+    <td>En az 5</td>
+    <td>7 model</td>
+    <td class="check">✓</td>
+  </tr>
+  <tr>
+    <td>API (view) sayısı</td>
+    <td>En az 10</td>
+    <td>15 API endpoint</td>
+    <td class="check">✓</td>
+  </tr>
+  <tr>
+    <td>Giriş formu</td>
+    <td>En az 2</td>
+    <td>4 form</td>
+    <td class="check">✓</td>
+  </tr>
+  <tr>
+    <td>Listeleme sayfası</td>
+    <td>En az 2</td>
+    <td>4 listeleme sayfası</td>
+    <td class="check">✓</td>
+  </tr>
+  <tr>
+    <td>URL yönlendirmeleri</td>
+    <td>Var olmalı</td>
+    <td>Tanımlı</td>
+    <td class="check">✓</td>
+  </tr>
+</table>
+
+<!-- ===================== MODELLER ===================== -->
+<h2>1. Modeller (clinic/models.py)</h2>
+<p class="section-note">Projede 7 veritabanı modeli bulunmaktadır.</p>
+
+<table>
+  <tr>
+    <th>Model</th>
+    <th>Alanlar</th>
+    <th>İlişki</th>
+  </tr>
+  <tr>
+    <td><code>Doctor</code></td>
+    <td>name, specialty, phone_number</td>
+    <td>–</td>
+  </tr>
+  <tr>
+    <td><code>Patient</code></td>
+    <td>full_name, national_id, date_of_birth, base_weight, phone_number, age (property)</td>
+    <td>OneToOne → User</td>
+  </tr>
+  <tr>
+    <td><code>Appointment</code></td>
+    <td>date, time, status</td>
+    <td>ForeignKey → Patient, Doctor</td>
+  </tr>
+  <tr>
+    <td><code>PregnancyVitals</code></td>
+    <td>tracking_code (UUID), systolic_bp, diastolic_bp, blood_sugar, body_temp, heart_rate, risk_level, recorded_at</td>
+    <td>ForeignKey → Patient</td>
+  </tr>
+  <tr>
+    <td><code>Prescription</code></td>
+    <td>medication_details, date_issued</td>
+    <td>ForeignKey → Patient, Doctor</td>
+  </tr>
+  <tr>
+    <td><code>ModelMetric</code></td>
+    <td>model_name, accuracy_score</td>
+    <td>–</td>
+  </tr>
+  <tr>
+    <td><code>UserProfile</code></td>
+    <td>role (Admin/Patient)</td>
+    <td>OneToOne → User, OneToOne → Patient</td>
+  </tr>
+</table>
+
+<h3>Örnek model kodu – Patient ve PregnancyVitals</h3>
+<pre>class Patient(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                null=True, blank=True, related_name='patient_model')
+    full_name    = models.CharField(max_length=255)
+    national_id  = models.CharField(max_length=11, unique=True, null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    base_weight  = models.FloatField()
+    phone_number = models.CharField(max_length=20)
+
+    @property
+    def age(self):
+        if not self.date_of_birth:
+            return 0
+        today = date.today()
+        return today.year - self.date_of_birth.year - (
+            (today.month, today.day) &lt; (self.date_of_birth.month, self.date_of_birth.day)
+        )
+
+
+class PregnancyVitals(models.Model):
+    RISK_LEVEL_CHOICES = [('Low', 'Düşük'), ('Mid', 'Orta'), ('High', 'Yüksek')]
+
+    patient       = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='vitals')
+    tracking_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    systolic_bp   = models.FloatField()
+    diastolic_bp  = models.FloatField()
+    blood_sugar   = models.FloatField()
+    body_temp     = models.FloatField()
+    heart_rate    = models.FloatField()
+    risk_level    = models.CharField(max_length=10, choices=RISK_LEVEL_CHOICES, blank=True)
+    recorded_at   = models.DateTimeField(auto_now_add=True)</pre>
+
+<!-- ===================== URL YÖNLENDİRMELERİ ===================== -->
+<h2>2. URL Yönlendirmeleri (clinic/urls.py)</h2>
+
+<h3>Arayüz URL'leri</h3>
+<table>
+  <tr><th>URL</th><th>View</th><th>Açıklama</th></tr>
+  <tr><td><code>/</code></td><td>login_view</td><td>Giriş sayfası</td></tr>
+  <tr><td><code>/dashboard/</code></td><td>dashboard_view</td><td>Yönetim paneli</td></tr>
+  <tr><td><code>/patients/</code></td><td>patient_list_view</td><td>Hasta listesi</td></tr>
+  <tr><td><code>/patients/new/</code></td><td>patient_create_view</td><td>Yeni hasta formu</td></tr>
+  <tr><td><code>/doctors/</code></td><td>doctor_list_view</td><td>Doktor listesi</td></tr>
+  <tr><td><code>/doctors/new/</code></td><td>doctor_create_view</td><td>Yeni doktor formu</td></tr>
+  <tr><td><code>/vitals/</code></td><td>vitals_list_view</td><td>Ölçüm kayıtları listesi</td></tr>
+  <tr><td><code>/vitals/predict/</code></td><td>vitals_predict_view</td><td>Risk analizi formu</td></tr>
+  <tr><td><code>/appointments/</code></td><td>appointment_list_view</td><td>Randevu listesi</td></tr>
+  <tr><td><code>/result-lookup/</code></td><td>result_lookup_view</td><td>Güvenli sonuç sorgulama</td></tr>
+</table>
+
+<h3>REST API URL'leri</h3>
+<table>
+  <tr><th>URL</th><th>Metot</th><th>Açıklama</th></tr>
+  <tr><td><code>/api/patients/</code></td><td>GET, POST</td><td>Hasta listele / oluştur</td></tr>
+  <tr><td><code>/api/patients/{id}/</code></td><td>GET, PUT, DELETE</td><td>Hasta detay / güncelle / sil</td></tr>
+  <tr><td><code>/api/vitals-data/</code></td><td>GET, POST</td><td>Vital listele / oluştur</td></tr>
+  <tr><td><code>/api/my-vitals/</code></td><td>GET</td><td>Giriş yapan hastanın kendi ölçümleri</td></tr>
+  <tr><td><code>/api/doctors/</code></td><td>GET</td><td>Doktor listesi</td></tr>
+  <tr><td><code>/api/doctors/create/</code></td><td>POST</td><td>Yeni doktor ekle</td></tr>
+  <tr><td><code>/api/appointments/</code></td><td>GET</td><td>Randevu listesi</td></tr>
+  <tr><td><code>/api/appointments/create/</code></td><td>POST</td><td>Yeni randevu oluştur</td></tr>
+  <tr><td><code>/api/vitals/predict/</code></td><td>POST</td><td>Vital gir, risk hesapla ve kaydet</td></tr>
+  <tr><td><code>/api/verify-result/</code></td><td>POST</td><td>TC kimlik ile sonuç sorgula (herkese açık)</td></tr>
+  <tr><td><code>/api/dashboard/</code></td><td>GET</td><td>Klinik istatistikleri</td></tr>
+  <tr><td><code>/api/model-metrics/</code></td><td>GET</td><td>ML model doğruluk oranları</td></tr>
+  <tr><td><code>/api/auth/login/</code></td><td>POST</td><td>Kullanıcı girişi, JWT token döndürür</td></tr>
+  <tr><td><code>/api/auth/me/</code></td><td>GET</td><td>Giriş yapan kullanıcının bilgileri</td></tr>
+</table>
+
+<!-- ===================== VIEW'LAR ===================== -->
+<h2>3. API View'ları (clinic/views.py)</h2>
+<p class="section-note">
+  İki ModelViewSet ve on üç function-based view olmak üzere toplam 15 API endpoint bulunmaktadır.
+</p>
+
+<h3>ModelViewSet'ler</h3>
+<pre>class PatientViewSet(viewsets.ModelViewSet):
+    serializer_class = PatientSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'create']:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAuthenticated, IsOwner]
+        return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        user = self.request.user
+        if hasattr(user, 'profile') and user.profile.role == 'Admin':
+            return Patient.objects.all().order_by('-id')
+        return Patient.objects.filter(user=user).order_by('-id')</pre>
+
+<h3>Risk hesaplama fonksiyonu</h3>
+<pre>def calculate_risk(systolic_bp, diastolic_bp, blood_sugar, body_temp, heart_rate):
+    score = 0
+    if systolic_bp > 140 or systolic_bp < 90:   score += 2
+    elif systolic_bp > 120:                       score += 1
+    if diastolic_bp > 90 or diastolic_bp < 60:  score += 2
+    elif diastolic_bp > 80:                       score += 1
+    if blood_sugar > 11 or blood_sugar < 3.5:    score += 2
+    elif blood_sugar > 7.5:                       score += 1
+    if body_temp > 100.4 or body_temp < 97:      score += 2
+    elif body_temp > 99:                          score += 1
+    if heart_rate > 100 or heart_rate < 60:      score += 2
+    elif heart_rate > 90:                         score += 1
+
+    if score >= 5:   return 'High'
+    elif score >= 2: return 'Mid'
+    return 'Low'</pre>
+
+<h3>Örnek function-based view – verify_patient_result</h3>
+<pre>@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_patient_result(request):
+    national_id  = request.data.get('national_id', '').strip()
+    full_name    = request.data.get('full_name', '').strip().lower()
+    date_of_birth = request.data.get('date_of_birth')
+
+    try:
+        patient = Patient.objects.get(national_id=national_id)
+    except Patient.DoesNotExist:
+        return Response({'error': 'Kayıt bulunamadı'}, status=404)
+
+    if patient.full_name.strip().lower() != full_name:
+        return Response({'error': 'Bilgiler eşleşmiyor'}, status=400)
+
+    latest = patient.vitals.order_by('-recorded_at').first()
+    return Response({
+        'patient_name': patient.full_name,
+        'risk_level':   latest.risk_level,
+        'recorded_at':  latest.recorded_at,
+    })</pre>
+
+<!-- ===================== ARAYÜZ ===================== -->
+<h2>4. Kullanıcı Arayüzü</h2>
+
+<h3>Giriş Formları (en az 2 gerekli)</h3>
+<table>
+  <tr><th>Form</th><th>URL</th><th>Alanlar</th></tr>
+  <tr>
+    <td>Hasta Kaydı</td>
+    <td><code>/patients/new/</code></td>
+    <td>Ad soyad, T.C. kimlik no, doğum tarihi, ağırlık, telefon</td>
+  </tr>
+  <tr>
+    <td>Risk Analizi</td>
+    <td><code>/vitals/predict/</code></td>
+    <td>Hasta seçimi, sistolik/diastolik tansiyon, kan şekeri, vücut sıcaklığı, kalp hızı</td>
+  </tr>
+  <tr>
+    <td>Sonuç Sorgulama</td>
+    <td><code>/result-lookup/</code></td>
+    <td>Ad soyad, T.C. kimlik no, doğum tarihi</td>
+  </tr>
+  <tr>
+    <td>Yeni Doktor Ekleme</td>
+    <td><code>/doctors/new/</code></td>
+    <td>Ad soyad, uzmanlık alanı, telefon</td>
+  </tr>
+</table>
+
+<h3>Listeleme Sayfaları (en az 2 gerekli)</h3>
+<table>
+  <tr><th>Sayfa</th><th>URL</th><th>İçerik</th></tr>
+  <tr>
+    <td>Dashboard</td>
+    <td><code>/dashboard/</code></td>
+    <td>Hasta/doktor/randevu sayıları, ML model doğruluk oranları, son ölçümler</td>
+  </tr>
+  <tr>
+    <td>Hasta Listesi</td>
+    <td><code>/patients/</code></td>
+    <td>Tüm hastaların adı, T.C., yaşı, ağırlığı, telefonu; arama filtresi</td>
+  </tr>
+  <tr>
+    <td>Doktor Listesi</td>
+    <td><code>/doctors/</code></td>
+    <td>Kayıtlı doktorların adı, uzmanlığı, telefonu</td>
+  </tr>
+  <tr>
+    <td>Ölçüm Kayıtları</td>
+    <td><code>/vitals/</code></td>
+    <td>Tüm vital ölçümleri ve hesaplanan risk seviyesi (Düşük / Orta / Yüksek)</td>
+  </tr>
+  <tr>
+    <td>Randevular</td>
+    <td><code>/appointments/</code></td>
+    <td>Hasta-doktor randevu kayıtları ve durumu</td>
+  </tr>
+</table>
+
+</body>
+</html>
