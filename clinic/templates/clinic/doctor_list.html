@@ -6,7 +6,13 @@
 <div class="d-flex justify-content-between align-items-start mb-4">
     <div>
         <h5 class="fw-bold mb-1">Doktorlar</h5>
-        <p class="text-muted small mb-0">Klinikte kayıtlı doktorları görüntüleyin ve yönetin</p>
+        <p class="text-muted small mb-0">
+            {% if request.user.profile.role == 'Admin' %}
+                Klinikte kayıtlı doktorları görüntüleyin ve yönetin
+            {% else %}
+                Klinikte görev yapan doktorlar
+            {% endif %}
+        </p>
     </div>
     {% if request.user.profile.role == 'Admin' %}
     <a href="{% url 'doctor_create' %}" class="btn btn-primary btn-sm">
