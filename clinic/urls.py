@@ -9,6 +9,7 @@ router.register('vitals-data', views.PregnancyVitalsViewSet, basename='vitals-da
 urlpatterns = [
     # Şablon tabanlı arayüz sayfaları
     path('', ui_views.login_view, name='login'),
+    path('register/', ui_views.register_view, name='register'),
     path('logout/', ui_views.logout_view, name='logout'),
     path('dashboard/', ui_views.dashboard_view, name='dashboard'),
     path('patients/', ui_views.patient_list_view, name='patient_list'),

@@ -1,25 +1,68 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from .models import Patient, Doctor, Appointment, PregnancyVitals, ModelMetric
-from .forms import PatientForm, VitalsForm, ResultLookupForm, AppointmentForm, DoctorForm
+from .forms import (
+    PatientForm, VitalsForm, ResultLookupForm,
+    AppointmentForm, PatientAppointmentForm,
+    DoctorForm, PatientRegisterForm,
+)
 from .views import calculate_risk
+
+
+def is_admin(user):
+    return hasattr(user, 'profile') and user.profile.role == 'Admin'
 
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        if is_admin(request.user):
+            return redirect('dashboard')
+        return redirect('vitals_list')
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect('dashboard')
+            if is_admin(user):
+                return redirect('dashboard')
+            return redirect('vitals_list')
         messages.error(request, 'Geçersiz kullanıcı adı veya şifre.')
     return render(request, 'clinic/login.html')
+
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('vitals_list')
+    if request.method == 'POST':
+        form = PatientRegisterForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            user = User.objects.create_user(
+                username=data['national_id'],
+                password=data['password'],
+            )
+            patient = Patient.objects.create(
+                user=user,
+                full_name=data['full_name'],
+                national_id=data['national_id'],
+                date_of_birth=data['date_of_birth'],
+                base_weight=data['base_weight'],
+                phone_number=data['phone_number'],
+            )
+            # Sinyal profil oluşturdu, hasta kaydını bağla
+            user.profile.patient_record = patient
+            user.profile.save()
+            login(request, user)
+            messages.success(request, 'Hesabınız oluşturuldu. Hoş geldiniz!')
+            return redirect('vitals_list')
+    else:
+        form = PatientRegisterForm()
+    return render(request, 'clinic/register.html', {'form': form})
 
 
 def logout_view(request):
@@ -29,6 +72,9 @@ def logout_view(request):
 
 @login_required
 def dashboard_view(request):
+    # Hasta kullanıcılar dashboard'a erişemez
+    if not is_admin(request.user):
+        return redirect('vitals_list')
     context = {
         'total_patients': Patient.objects.count(),
         'total_doctors': Doctor.objects.count(),
@@ -70,7 +116,7 @@ def patient_create_view(request):
 @login_required
 def vitals_list_view(request):
     user = request.user
-    if hasattr(user, 'profile') and user.profile.role == 'Admin':
+    if is_admin(user):
         vitals = PregnancyVitals.objects.all().select_related('patient').order_by('-recorded_at')
     else:
         vitals = PregnancyVitals.objects.filter(patient__user=user).order_by('-recorded_at')
@@ -79,7 +125,6 @@ def vitals_list_view(request):
 
 @login_required
 def vitals_predict_view(request):
-    # Hasta listesinden "Ölçüm Al" butonuyla gelindiyse hastayı ön seçili yap
     patient_id = request.GET.get('patient')
     initial = {}
     if patient_id:
@@ -112,6 +157,16 @@ def vitals_predict_view(request):
 
 
 def result_lookup_view(request):
+    # Giriş yapmış hasta kendi tüm sonuçlarını görür
+    if request.user.is_authenticated and not is_admin(request.user):
+        try:
+            patient = request.user.patient_model
+            vitals = patient.vitals.order_by('-recorded_at')
+        except Exception:
+            vitals = []
+        return render(request, 'clinic/result_lookup.html', {'patient_vitals': vitals})
+
+    # Giriş yapılmamış ziyaretçi için TC ile sorgulama formu
     result = None
     error = None
     if request.method == 'POST':
@@ -153,6 +208,9 @@ def doctor_list_view(request):
 
 @login_required
 def doctor_create_view(request):
+    if not is_admin(request.user):
+        messages.error(request, 'Bu işlem için yetkiniz yok.')
+        return redirect('doctor_list')
     if request.method == 'POST':
         form = DoctorForm(request.POST)
         if form.is_valid():
@@ -167,7 +225,7 @@ def doctor_create_view(request):
 @login_required
 def appointment_list_view(request):
     user = request.user
-    if hasattr(user, 'profile') and user.profile.role == 'Admin':
+    if is_admin(user):
         appointments = Appointment.objects.select_related('patient', 'doctor').order_by('-date')
     else:
         appointments = Appointment.objects.filter(patient__user=user).select_related('doctor').order_by('-date')
@@ -176,12 +234,34 @@ def appointment_list_view(request):
 
 @login_required
 def appointment_create_view(request):
+    user = request.user
+    admin = is_admin(user)
+
     if request.method == 'POST':
-        form = AppointmentForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Randevu başarıyla oluşturuldu.')
-            return redirect('appointment_list')
+        if admin:
+            form = AppointmentForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Randevu başarıyla oluşturuldu.')
+                return redirect('appointment_list')
+        else:
+            form = PatientAppointmentForm(request.POST)
+            if form.is_valid():
+                try:
+                    patient = user.patient_model
+                except Exception:
+                    messages.error(request, 'Hasta kaydınız bulunamadı.')
+                    return redirect('appointment_list')
+                Appointment.objects.create(
+                    patient=patient,
+                    doctor=form.cleaned_data['doctor'],
+                    date=form.cleaned_data['date'],
+                    time=form.cleaned_data['time'],
+                    status='Scheduled',
+                )
+                messages.success(request, 'Randevunuz başarıyla oluşturuldu.')
+                return redirect('appointment_list')
     else:
-        form = AppointmentForm()
-    return render(request, 'clinic/appointment_form.html', {'form': form})
+        form = AppointmentForm() if admin else PatientAppointmentForm()
+
+    return render(request, 'clinic/appointment_form.html', {'form': form, 'is_admin': admin})

@@ -9,7 +9,10 @@
         <div class="text-center mb-4 mt-2">
             <div class="fs-2 mb-2">&#9829;</div>
             <h5 class="fw-bold mb-1">Maternal Health System</h5>
-            <p class="text-muted small">Sisteme giriş yapın</p>
+            <div class="d-flex justify-content-center gap-3 mt-2">
+                <span class="fw-semibold text-primary border-bottom border-2 border-primary pb-1 small">Giriş Yap</span>
+                <a href="{% url 'register' %}" class="text-muted small pb-1">Kayıt Ol</a>
+            </div>
         </div>
 
         {% if messages %}
@@ -21,9 +24,9 @@
         <form method="post">
             {% csrf_token %}
             <div class="mb-3">
-                <label class="form-label fw-semibold small">Kullanıcı Adı</label>
+                <label class="form-label fw-semibold small">Kullanıcı Adı / T.C. Kimlik No</label>
                 <input type="text" name="username" class="form-control"
-                       placeholder="admin veya patient1" required autofocus>
+                       placeholder="T.C. kimlik no veya kullanıcı adı" required autofocus>
             </div>
             <div class="mb-4">
                 <label class="form-label fw-semibold small">Şifre</label>

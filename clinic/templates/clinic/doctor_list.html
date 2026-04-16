@@ -8,9 +8,11 @@
         <h5 class="fw-bold mb-1">Doktorlar</h5>
         <p class="text-muted small mb-0">Klinikte kayıtlı doktorları görüntüleyin ve yönetin</p>
     </div>
+    {% if request.user.profile.role == 'Admin' %}
     <a href="{% url 'doctor_create' %}" class="btn btn-primary btn-sm">
         + Yeni Doktor Ekle
     </a>
+    {% endif %}
 </div>
 
 <div class="card">

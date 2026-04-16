@@ -1,8 +1,65 @@
 {% extends 'clinic/base.html' %}
 
-{% block title %}Sonuç Sorgula - MHI System{% endblock %}
+{% block title %}Sonuçlarım - MHI System{% endblock %}
 
 {% block content %}
+
+{% if patient_vitals is not None %}
+<!-- Giriş yapmış hasta kendi tüm sonuçlarını görür -->
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Tahlil Sonuçlarım</h5>
+        <p class="text-muted small mb-0">Sisteme kaydedilmiş tüm ölçüm sonuçlarınız</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if patient_vitals %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3">Tarih</th>
+                        <th>Risk Seviyesi</th>
+                        <th>Sis. Tansiyon</th>
+                        <th>Dias. Tansiyon</th>
+                        <th>Kan Şekeri</th>
+                        <th>Kalp Hızı</th>
+                        <th>Vücut Isısı</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in patient_vitals %}
+                    <tr>
+                        <td class="px-3">{{ v.recorded_at|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            {% if v.risk_level == 'Low' %}
+                            <span class="badge badge-low">Düşük</span>
+                            {% elif v.risk_level == 'Mid' %}
+                            <span class="badge badge-mid">Orta</span>
+                            {% else %}
+                            <span class="badge badge-high">Yüksek</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ v.systolic_bp }} mmHg</td>
+                        <td>{{ v.diastolic_bp }} mmHg</td>
+                        <td>{{ v.blood_sugar }} mmol/L</td>
+                        <td>{{ v.heart_rate }} bpm</td>
+                        <td>{{ v.body_temp }} °F</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-5 mb-0">Henüz kayıtlı ölçüm sonucunuz bulunmamaktadır.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<!-- Giriş yapılmamış ziyaretçi için TC sorgulama formu -->
 <div class="d-flex justify-content-center mt-4">
     <div class="card" style="width: 440px;">
         <div class="card-body p-4">
@@ -65,4 +122,6 @@
         </div>
     </div>
 </div>
+{% endif %}
+
 {% endblock %}

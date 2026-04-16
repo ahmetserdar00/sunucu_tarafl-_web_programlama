@@ -70,6 +70,7 @@
     <div class="sidebar">
         <div class="brand">MHI System</div>
         <nav class="px-1">
+            {% if user.profile.role == 'Admin' %}
             <a href="{% url 'dashboard' %}"
                class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                 Dashboard
@@ -78,6 +79,7 @@
                class="{% if 'patient' in request.resolver_match.url_name %}active{% endif %}">
                 Hastalar
             </a>
+            {% endif %}
             <a href="{% url 'doctor_list' %}"
                class="{% if 'doctor' in request.resolver_match.url_name %}active{% endif %}">
                 Doktorlar
@@ -90,7 +92,10 @@
                class="{% if 'appointment' in request.resolver_match.url_name %}active{% endif %}">
                 Randevular
             </a>
-            <a href="{% url 'result_lookup' %}">Sonuç Sorgula</a>
+            <a href="{% url 'result_lookup' %}"
+               class="{% if request.resolver_match.url_name == 'result_lookup' %}active{% endif %}">
+                Sonuçlarım
+            </a>
         </nav>
         <div class="sidebar-footer">
             <div class="text-muted small mb-1">{{ request.user.username }}</div>

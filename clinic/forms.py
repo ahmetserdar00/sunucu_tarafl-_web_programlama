@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.models import User
 from .models import Patient, Appointment, Doctor
 
 BOOTSTRAP_INPUT = {'class': 'form-control'}
@@ -73,6 +74,72 @@ class ResultLookupForm(forms.Form):
     date_of_birth = forms.DateField(
         label='Doğum Tarihi',
         widget=forms.DateInput(attrs={**BOOTSTRAP_INPUT, 'type': 'date'}),
+    )
+
+
+class PatientRegisterForm(forms.Form):
+    full_name = forms.CharField(
+        label='Ad Soyad',
+        widget=forms.TextInput(attrs={**BOOTSTRAP_INPUT, 'placeholder': 'Örn: Ayşe Kaya'}),
+    )
+    national_id = forms.CharField(
+        label='T.C. Kimlik No (11 hane)',
+        min_length=11,
+        max_length=11,
+        widget=forms.TextInput(attrs={**BOOTSTRAP_INPUT, 'placeholder': '12345678901'}),
+    )
+    date_of_birth = forms.DateField(
+        label='Doğum Tarihi',
+        widget=forms.DateInput(attrs={**BOOTSTRAP_INPUT, 'type': 'date'}),
+    )
+    base_weight = forms.FloatField(
+        label='Vücut Ağırlığı (kg)',
+        widget=forms.NumberInput(attrs={**BOOTSTRAP_INPUT, 'step': '0.1', 'placeholder': 'Örn: 65.5'}),
+    )
+    phone_number = forms.CharField(
+        label='Telefon Numarası',
+        widget=forms.TextInput(attrs={**BOOTSTRAP_INPUT, 'placeholder': '+90 555 123 4567'}),
+    )
+    password = forms.CharField(
+        label='Şifre',
+        widget=forms.PasswordInput(attrs=BOOTSTRAP_INPUT),
+    )
+    password_confirm = forms.CharField(
+        label='Şifre Tekrar',
+        widget=forms.PasswordInput(attrs=BOOTSTRAP_INPUT),
+    )
+
+    def clean_national_id(self):
+        tc = self.cleaned_data['national_id']
+        if not tc.isdigit():
+            raise forms.ValidationError('T.C. kimlik numarası sadece rakam içermelidir.')
+        if User.objects.filter(username=tc).exists():
+            raise forms.ValidationError('Bu T.C. kimlik numarası ile zaten bir hesap mevcut.')
+        return tc
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get('password')
+        p2 = cleaned_data.get('password_confirm')
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError('Şifreler eşleşmiyor.')
+        return cleaned_data
+
+
+class PatientAppointmentForm(forms.Form):
+    doctor = forms.ModelChoiceField(
+        queryset=Doctor.objects.all(),
+        label='Doktor',
+        empty_label='-- Doktor Seçin --',
+        widget=forms.Select(attrs=BOOTSTRAP_SELECT),
+    )
+    date = forms.DateField(
+        label='Tarih',
+        widget=forms.DateInput(attrs={**BOOTSTRAP_INPUT, 'type': 'date'}),
+    )
+    time = forms.TimeField(
+        label='Saat',
+        widget=forms.TimeInput(attrs={**BOOTSTRAP_INPUT, 'type': 'time'}),
     )
 
 
